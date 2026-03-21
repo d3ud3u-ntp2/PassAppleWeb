@@ -114,10 +114,16 @@ def create_masked_overlay(background_path, target_path, mask_path, output_dir, b
     output_path = os.path.join(output_dir, filename)
 
     try:
-        with Image.open(mask_path) as mask_img, \
+        with Image.open(mask_path) as mask_img_raw, \
              Image.open(target_path) as target_img, \
              Image.open(background_path) as bg_img:
             
+            # --- Resize Mask to Match Target Size ---
+            if mask_img_raw.size != target_img.size:
+                mask_img = mask_img_raw.resize(target_img.size)
+            else:
+                mask_img = mask_img_raw.copy()
+
             # --- Determine Bounding Box ---
             bbox = None
             if bbox_path:
@@ -164,18 +170,20 @@ def create_masked_overlay(background_path, target_path, mask_path, output_dir, b
 
             final_composition.save(output_path, "PNG")
             print(f"Success: Sequentially processed 3D composition saved to {output_path}")
+            return filename
                 
     except Exception as e:
         print(f"An error occurred: {e}")
+        return None
 
-def run():
+def run(input_file=None):
     bg_file = os.path.join("dist", "apple_before.jpg")
     target_file = os.path.join("dist", "apple_yake.jpg")
-    mask_file = os.path.join("input", "apple_input.jpg")
+    mask_file = input_file if input_file else os.path.join("input", "apple_input.jpg")
     bbox_file = os.path.join("input", "bounding_box.txt") # External bbox file
     
     output_dir = "output"
-    create_masked_overlay(bg_file, target_file, mask_file, output_dir, bbox_file)
+    return create_masked_overlay(bg_file, target_file, mask_file, output_dir, bbox_file)
 
 if __name__ == "__main__":
     run()
