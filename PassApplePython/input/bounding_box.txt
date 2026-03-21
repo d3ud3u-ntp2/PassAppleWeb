@@ -1,0 +1,3 @@
+# Formatted as: min_x, min_y, max_x, max_y
+# Example for a center-aligned apple:
+249, 178, 811, 700

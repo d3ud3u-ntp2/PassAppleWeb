@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-i18n="title-index">Select Your Fruit - Pass Apple</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            overflow: auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 8rem;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            margin: 0;
+        }
+
+        .selection-container {
+            max-width: 800px;
+            width: 90%;
+            padding: 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .about-link {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+            font-weight: 300;
+            letter-spacing: 0.05rem;
+        }
+
+        .about-link:hover {
+            opacity: 1;
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            color: white;
+            opacity: 0.4;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            padding: 0.3rem 0.6rem;
+            border-radius: 7px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover {
+            opacity: 0.8;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-btn.active {
+            opacity: 1;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .selection-header h1 {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .selection-header p {
+            font-size: 1.1rem;
+            opacity: 0.6;
+            margin-bottom: 3rem;
+        }
+
+        .fruit-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        @media (max-width: 600px) {
+            .fruit-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fruit-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .fruit-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .fruit-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 16px;
+            transition: transform 0.4s ease;
+        }
+
+        .fruit-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .fruit-card span {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 0.05rem;
+        }
+
+        .fruit-card.disabled {
+            opacity: 0.6;
+            cursor: default;
+            pointer-events: none;
+            filter: grayscale(0.5);
+            position: relative;
+        }
+
+        .fruit-card.disabled::after {
+            content: attr(data-coming-soon-text);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body data-page-title="title-index">
+    <nav class="top-bar">
+        <div class="logo" data-i18n="app-name">PassAppleApp</div>
+        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 1.5rem;">
+            <div class="lang-switch">
+                <button class="lang-btn" id="btn-ja" onclick="i18n.setLanguage('ja'); updateActiveLang();">JA</button>
+                <button class="lang-btn" id="btn-en" onclick="i18n.setLanguage('en'); updateActiveLang();">EN</button>
+                <button class="lang-btn" id="btn-zh" onclick="i18n.setLanguage('zh'); updateActiveLang();">ZH</button>
+                <button class="lang-btn" id="btn-ko" onclick="i18n.setLanguage('ko'); updateActiveLang();">KO</button>
+                <button class="lang-btn" id="btn-itl"
+                    onclick="i18n.setLanguage('itl'); updateActiveLang();">ITL</button>
+            </div>
+            <a href="about.html" class="about-link" data-i18n="about-app">About this app</a>
+        </div>
+    </nav>
+
+    <div class="selection-container">
+        <div class="selection-header">
+            <h1 data-i18n="select-fruit">Select a Fruit</h1>
+            <p data-i18n="choose-canvas">Choose your canvas to start drawing</p>
+        </div>
+
+        <div class="fruit-grid">
+            <a href="apple.html?fruit=apple" class="fruit-card">
+                <img src="static/images/apple_base.jpg" alt="Apple" data-i18n="fruit-apple">
+                <span data-i18n="fruit-apple">Apple</span>
+            </a>
+            <a class="fruit-card disabled" id="card-maron">
+                <img src="static/images/maron_base.png" alt="Maron" data-i18n="fruit-maron">
+                <span data-i18n="fruit-maron">Maron</span>
+            </a>
+            <a class="fruit-card disabled" id="card-radish">
+                <img src="static/images/radish_base.png" alt="Radish" data-i18n="fruit-radish">
+                <span data-i18n="fruit-radish">Radish</span>
+            </a>
+            <a class="fruit-card disabled" id="card-watermelon">
+                <img src="static/images/watermeron_base.png" alt="Watermelon" data-i18n="fruit-watermelon">
+                <span data-i18n="fruit-watermelon">Watermelon</span>
+            </a>
+        </div>
+    </div>
+    <script src="i18n.js"></script>
+    <script>
+        function updateActiveLang() {
+            const current = i18n.currentLang();
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + current).classList.add('active');
+
+            // Update Coming Soon text for disabled cards
+            const comingSoonText = i18n.t('coming-soon');
+            document.querySelectorAll('.fruit-card.disabled').forEach(card => {
+                card.setAttribute('data-coming-soon-text', comingSoonText);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', updateActiveLang);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-i18n="title-apple">Sleek Sketch - White on Black</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.3rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: auto;
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            color: white;
+            opacity: 0.4;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-family: 'Outfit', sans-serif;
+            padding: 0.2rem 0.6rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover {
+            opacity: 0.8;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-btn.active {
+            opacity: 1;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tool-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tool-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .tool-btn.bright {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .tool-btn.bright:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .tool-btn img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            transition: transform 0.2s ease;
+        }
+
+        .tool-btn:hover img {
+            transform: scale(1.1);
+        }
+
+        .hint {
+            position: static;
+            transform: none;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            pointer-events: auto;
+        }
+
+        .top-bar-spacer {
+            width: 80px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.4) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            font-size: 0.8rem !important;
+            padding: 0.4rem 0.8rem !important;
+            border-radius: 8px !important;
+            color: white !important;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+    </style>
+</head>
+
+<body data-page-title="title-apple">
+    <div class="top-bar">
+        <a href="index.html" class="btn secondary back-btn" data-i18n="back">Back</a>
+        <div class="hint" data-i18n="hint">Draw with finger or mouse</div>
+        <div class="top-bar-spacer"></div>
+    </div>
+
+    <div class="app-container">
+        <div id="transformLayer">
+            <div class="background-layer">
+                <img id="baseImage" src="static/images/apple_base.jpg" alt="Background">
+            </div>
+            <canvas id="drawingCanvas"></canvas>
+        </div>
+
+        <div class="ui-overlay">
+            <div class="toolbar glass">
+                <div class="tool-group">
+                    <button id="penBtn" class="tool-btn active" data-i18n="pen" data-i18n-title="pen" data-i18n-no-text>
+                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0zIDE3LjI1VjIxaDMuNzVMMTcuODEgOS45NGwtMy43NS0zLjc1TDMgMTcuMjV6TTIwLjcxIDcuMDRjLjM5LS4zOS4zOS0xLjAyIDAtMS40MWwtMi4zNC0yLjM0Yy0uMzktLjM5LTEuMDItLjM5LTEuNDEgMGwtMS44MyAxLjgzIDMuNzUgMy43NSAxLjgzLTEuODN6Ii8+PC9zdmc+"
+                            alt="Pen">
+                    </button>
+                    <button id="eraserBtn" class="tool-btn" data-i18n="eraser" data-i18n-title="eraser"
+                        data-i18n-no-text>
+                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSAxOEg1Yy0xLjEgMC0yLS45LTItMlY4YzAtMS4xLjktMiAyLTJoMTRjMS4xIDAgMiAuOSAyIDJ2OGMwIDEuMS0uOSAyLTItMnpNNyAxNmg0VjhIN3Y4em0xMiAwdi04aC02djhoNnoiLz48L3N2Zz4="
+                            alt="Eraser">
+                    </button>
+                    <button id="textBtn" class="tool-btn" data-i18n="text" data-i18n-title="text" data-i18n-no-text>
+                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik01IDR2M2g1LjV2MTJoM1Y3SDE5VjR6Ii8+PC9zdmc+"
+                            alt="Text">
+                    </button>
+                    <div class="divider"></div>
+                    <label for="brushSize" data-i18n="brush-size">Size</label>
+                    <input type="range" id="brushSize" min="1" max="50" value="5">
+                    <span id="sizeValue">5px</span>
+                </div>
+                <div class="divider"></div>
+                <button id="undoBtn" class="tool-btn bright" data-i18n="undo" data-i18n-title="undo" data-i18n-no-text>
+                    <img src="static/images/undo.svg" alt="Undo">
+                </button>
+                <button id="redoBtn" class="tool-btn bright" data-i18n="redo" data-i18n-title="redo" data-i18n-no-text>
+                    <img src="static/images/redo.svg" alt="Redo">
+                </button>
+                <div class="divider"></div>
+                <button id="clearBtn" class="btn secondary" data-i18n="clear">Clear</button>
+                <button id="saveBtn" class="btn primary" data-i18n="save">Save</button>
+            </div>
+        </div>
+
+        <!-- Hint moved to top-bar -->
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="modal-overlay hidden">
+            <div class="loader-content">
+                <div class="modern-spinner"></div>
+                <p data-i18n="processing">Processing Image...</p>
+            </div>
+        </div>
+
+        <!-- Result Modal -->
+        <div id="resultModal" class="modal-overlay hidden">
+            <div class="modal-content glass">
+                <div class="modal-header">
+                    <h3 data-i18n="result-title">Processed Result</h3>
+                    <button id="closeModal" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <img id="resultImage" src="" alt="Result Image">
+                </div>
+                <div class="modal-footer" style="flex-direction: column; gap: 1rem;">
+                    <p data-i18n="share-prompt"
+                        style="font-size: 0.9rem; opacity: 0.8; text-align: center; margin-bottom: 0.5rem;">Share on SNS
+                        with hashtag #PassAppleApp!</p>
+                    <div style="display: flex; gap: 1rem; width: 100%; justify-content: center;">
+                        <button id="downloadBtn" class="btn primary" data-i18n="download">Download Result</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="i18n.js"></script>
+    <script src="config.js"></script>
+    <script src="main.js"></script>
+    <script>
+        function updateActiveLang() {
+            const current = i18n.currentLang();
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            const btn = document.getElementById('btn-' + current);
+            if (btn) btn.classList.add('active');
+        }
+        document.addEventListener('DOMContentLoaded', updateActiveLang);
+    </script>
+</body>
+
+</html>

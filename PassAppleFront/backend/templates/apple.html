@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Flask Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside>
+            <div>
+                <div class="logo">ANTIGRAVITY</div>
+                <nav>
+                    <ul>
+                        <li class="active">Overview</li>
+                        <li>Analytics</li>
+                        <li>Settings</li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="user-profile">
+                <button class="btn" id="refreshBtn">Refresh Data</button>
+            </div>
+        </aside>
+
+        <main>
+            <header>
+                <h1>Welcome Back</h1>
+                <p style="color: var(--text-muted);">Here's what's happening today.</p>
+            </header>
+
+            <div class="card">
+                <h3>System Status</h3>
+                <div class="stat-value" id="statusValue">Checking...</div>
+                <p id="statusMsg" style="color: var(--text-muted);">Connecting to backend...</p>
+            </div>
+
+            <div class="card">
+                <h3>Active Users</h3>
+                <div class="stat-value">1,284</div>
+                <div style="color: #10b981;">↑ 12% from last week</div>
+            </div>
+
+            <div class="card" style="grid-column: span 2;">
+                <h3>Performance Breakdown</h3>
+                <div style="height: 150px; display: flex; align-items: flex-end; gap: 1rem; margin-top: 1rem;">
+                    <div style="flex: 1; height: 60%; background: var(--primary); border-radius: 4px;"></div>
+                    <div style="flex: 1; height: 80%; background: var(--primary); border-radius: 4px;"></div>
+                    <div style="flex: 1; height: 40%; background: var(--primary); border-radius: 4px;"></div>
+                    <div style="flex: 1; height: 95%; background: var(--accent); border-radius: 4px;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

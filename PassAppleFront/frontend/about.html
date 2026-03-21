@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-i18n="about-app">About this app</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            overflow: auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 8rem;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            margin: 0;
+            color: white;
+            line-height: 1.6;
+        }
+
+        .content-container {
+            max-width: 800px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            padding: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #fff, #888);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        section {
+            margin-bottom: 2.5rem;
+            text-align: left;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        p {
+            opacity: 0.7;
+            font-weight: 300;
+            white-space: pre-line;
+        }
+
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            z-index: 100;
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            color: white;
+            opacity: 0.4;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            padding: 0.3rem 0.6rem;
+            border-radius: 7px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            opacity: 1;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body data-page-title="about-app">
+    <nav class="top-bar">
+        <a href="index.html" class="back-btn" data-i18n="back">Back</a>
+        <div class="logo" data-i18n="app-name">PassAppleApp</div>
+        <div class="lang-switch">
+            <button class="lang-btn" id="btn-ja" onclick="i18n.setLanguage('ja'); updateActiveLang();">JA</button>
+            <button class="lang-btn" id="btn-en" onclick="i18n.setLanguage('en'); updateActiveLang();">EN</button>
+            <button class="lang-btn" id="btn-zh" onclick="i18n.setLanguage('zh'); updateActiveLang();">ZH</button>
+            <button class="lang-btn" id="btn-ko" onclick="i18n.setLanguage('ko'); updateActiveLang();">KO</button>
+            <button class="lang-btn" id="btn-itl" onclick="i18n.setLanguage('itl'); updateActiveLang();">ITL</button>
+        </div>
+    </nav>
+
+    <div class="content-container">
+        <h1 data-i18n="about-app">About this app</h1>
+
+        <section>
+            <h2 data-i18n="about-header-1">What is Pass Apple?</h2>
+            <p data-i18n="about-desc-1">Pass Apple is a creative sketch application that lets you draw on various fruit
+                canvases. Your strokes are processed using advanced image blending to create unique visual results.</p>
+        </section>
+
+        <section>
+            <h2 data-i18n="about-header-2">How to use</h2>
+            <p data-i18n="about-desc-2">1. Select a fruit from the gallery. 2. Draw your design with white ink on the
+                black canvas. 3. Click "Save" to process and download your final creation.</p>
+        </section>
+    </div>
+
+    <script src="i18n.js"></script>
+    <script>
+        function updateActiveLang() {
+            const current = i18n.currentLang();
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + current).classList.add('active');
+        }
+        document.addEventListener('DOMContentLoaded', updateActiveLang);
+    </script>
+</body>
+
+</html>
