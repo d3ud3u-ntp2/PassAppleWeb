@@ -177,7 +177,7 @@ def create_masked_overlay(background_path, target_path, mask_path, output_dir, b
         return None
 
 def run(input_file=None):
-    bg_file = os.path.join("dist", "apple_before.jpg")
+    bg_file = os.path.join("dist", "apple_base.jpg")
     target_file = os.path.join("dist", "apple_yake.jpg")
     mask_file = input_file if input_file else os.path.join("input", "apple_input.jpg")
     bbox_file = os.path.join("input", "bounding_box.txt") # External bbox file

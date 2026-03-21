@@ -5,8 +5,13 @@ import json
 import base64
 from datetime import datetime
 import config
+import logging
+
+# Configure global basic logging to direct log records to standard output
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
+app.logger.setLevel(logging.INFO)
 
 @app.route("/")
 def hello_world():
@@ -16,13 +21,15 @@ def hello_world():
 def run_apple():
     req_data = request.get_json(silent=True)
     if not req_data:
+        print('file not get')
         try:
             sample_json_path = os.path.join("input", "input_json_sample.json")
             with open(sample_json_path, "r", encoding="utf-8") as f:
                 req_data = json.load(f)
         except Exception as e:
             print(f"Error loading sample JSON: {e}")
-            
+    else:
+        print('file get')
     if req_data and "image" in req_data:
         img_str = req_data["image"]
         if "base64," in img_str:
@@ -41,6 +48,7 @@ def run_apple():
     else:
         filename = apple.run()
     if filename:
+        print(f"Generated image: {filename}")
         full_url = f"{config.BASE_URL.rstrip('/')}/output/{filename}"
         return jsonify({
             "status": "success",
