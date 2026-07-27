@@ -291,41 +291,33 @@ const closeModal = document.getElementById('closeModal');
 const resultImage = document.getElementById('resultImage');
 const downloadBtn = document.getElementById('downloadBtn');
 
-saveBtn.addEventListener('click', () => {
-    const imageData = canvas.toDataURL('image/png');
-
-    // Save to server
+saveBtn.addEventListener('click', async () => {
     saveBtn.disabled = true;
     saveBtn.textContent = i18n.t('saving');
     loadingOverlay.classList.remove('hidden');
 
-    fetch(CONFIG.API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ image: imageData }),
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-            if (data.status === 'success' && data.path) {
-                // Show the modal with the returned image path
-                resultImage.src = data.path;
-                resultModal.classList.remove('hidden');
-            } else {
-                alert(i18n.t('error-no-path'));
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            alert(i18n.t('error-save'));
-        })
-        .finally(() => {
-            saveBtn.disabled = false;
-            saveBtn.textContent = i18n.t('save');
-            loadingOverlay.classList.add('hidden');
-        });
+    try {
+        const responseImageUrl = '../backend/cgi-bin/line_before/apple_input.jpg';
+        const compositeCanvas = await window.compositeImages(baseImage.src, responseImageUrl);
+        const compositeDataUrl = compositeCanvas.toDataURL('image/png');
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        resultImage.src = compositeDataUrl;
+        resultImage.onload = () => {
+            resultModal.classList.remove('hidden');
+        };
+        if (resultImage.complete) {
+            resultModal.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        resultImage.src = '';
+        resultModal.classList.remove('hidden');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = i18n.t('save');
+        loadingOverlay.classList.add('hidden');
+    }
 });
 
 closeModal.addEventListener('click', () => {
