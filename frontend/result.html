@@ -93,13 +93,24 @@
         const resultImage = document.getElementById('resultImage');
         const downloadBtn = document.getElementById('downloadBtn');
 
-        const dataUrl = sessionStorage.getItem('passapple-result-image');
+        const params = new URLSearchParams(window.location.search);
+        const dataUrl = sessionStorage.getItem('passapple-result-image')
+            || localStorage.getItem('passapple-result-image');
+
+        console.log('[PassApple] result page loaded', {
+            hasSession: !!sessionStorage.getItem('passapple-result-image'),
+            hasLocal: !!localStorage.getItem('passapple-result-image'),
+            fruit: params.get('fruit') || 'apple',
+            dataStart: dataUrl ? dataUrl.slice(0, 80) : 'none'
+        });
+
         if (dataUrl) {
             resultImage.src = dataUrl;
+            console.log('[PassApple] result image set from storage');
         } else {
-            const params = new URLSearchParams(window.location.search);
             const fruit = params.get('fruit') || 'apple';
             resultImage.src = `static/images/${fruit}_base.jpg`;
+            console.log('[PassApple] result image fallback to base image', resultImage.src);
         }
 
         downloadBtn.addEventListener('click', () => {

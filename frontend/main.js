@@ -291,37 +291,90 @@ const closeModal = document.getElementById('closeModal');
 const resultImage = document.getElementById('resultImage');
 const downloadBtn = document.getElementById('downloadBtn');
 
+function buildProcessedImageDataUrl() {
+    const width = canvas.width;
+    const height = canvas.height;
+
+    const outputCanvas = document.createElement('canvas');
+    outputCanvas.width = width;
+    outputCanvas.height = height;
+
+    const outputCtx = outputCanvas.getContext('2d');
+    outputCtx.clearRect(0, 0, width, height);
+    outputCtx.drawImage(baseImage, 0, 0, width, height);
+
+    const baseData = outputCtx.getImageData(0, 0, width, height);
+    const overlayData = ctx.getImageData(0, 0, width, height);
+
+    for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+            const idx = (y * width + x) * 4;
+            const r = overlayData.data[idx];
+            const g = overlayData.data[idx + 1];
+            const b = overlayData.data[idx + 2];
+            const a = overlayData.data[idx + 3];
+
+            if (a > 20 && r > 240 && g > 240 && b > 240) {
+                baseData.data[idx] = 255;
+                baseData.data[idx + 1] = 255;
+                baseData.data[idx + 2] = 255;
+                baseData.data[idx + 3] = 255;
+            }
+        }
+    }
+
+    outputCtx.putImageData(baseData, 0, 0);
+    return outputCanvas.toDataURL('image/png');
+}
+
 saveBtn.addEventListener('click', async () => {
     saveBtn.disabled = true;
     saveBtn.textContent = i18n.t('saving');
     loadingOverlay.classList.remove('hidden');
 
+    const targetFruit = fruit || 'apple';
+    const targetUrl = new URL('result.html', window.location.href);
+    targetUrl.searchParams.set('fruit', targetFruit);
+
     try {
-        const responseImageUrl = '../backend/cgi-bin/line_before/apple_input.jpg';
-        const compositeCanvas = await window.compositeImages(baseImage.src, responseImageUrl);
-        const compositeDataUrl = compositeCanvas.toDataURL('image/png');
+        const processedDataUrl = buildProcessedImageDataUrl();
+        console.log('[PassApple] processed image generated', processedDataUrl.slice(0, 80));
 
-        sessionStorage.setItem('passapple-result-image', compositeDataUrl);
-        sessionStorage.setItem('passapple-result-fruit', fruit || 'apple');
+        sessionStorage.removeItem('passapple-result-image');
+        localStorage.removeItem('passapple-result-image');
+        sessionStorage.setItem('passapple-result-image', processedDataUrl);
+        localStorage.setItem('passapple-result-image', processedDataUrl);
+        sessionStorage.setItem('passapple-result-fruit', targetFruit);
+        localStorage.setItem('passapple-result-fruit', targetFruit);
+        console.log('[PassApple] saved to storage', {
+            sessionHas: !!sessionStorage.getItem('passapple-result-image'),
+            localHas: !!localStorage.getItem('passapple-result-image'),
+            fruit: sessionStorage.getItem('passapple-result-fruit')
+        });
 
-        const resultPageUrl = `result.html?fruit=${encodeURIComponent(fruit || 'apple')}`;
-        window.location.href = resultPageUrl;
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        resultImage.src = compositeDataUrl;
-        resultImage.onload = () => {
-            resultModal.classList.remove('hidden');
-        };
-        if (resultImage.complete) {
-            resultModal.classList.remove('hidden');
-        }
+        setTimeout(() => {
+            console.log('[PassApple] navigating to result page', targetUrl.toString());
+            window.location.assign(targetUrl.toString());
+        }, 50);
     } catch (error) {
-        console.error('Error:', error);
-        sessionStorage.setItem('passapple-result-image', canvas.toDataURL('image/png'));
-        sessionStorage.setItem('passapple-result-fruit', fruit || 'apple');
-        window.location.href = `result.html?fruit=${encodeURIComponent(fruit || 'apple')}`;
-        resultImage.src = '';
-        resultModal.classList.remove('hidden');
+        console.error('[PassApple] save error:', error);
+        const fallbackImage = buildProcessedImageDataUrl();
+
+        sessionStorage.removeItem('passapple-result-image');
+        localStorage.removeItem('passapple-result-image');
+        sessionStorage.setItem('passapple-result-image', fallbackImage);
+        localStorage.setItem('passapple-result-image', fallbackImage);
+        sessionStorage.setItem('passapple-result-fruit', targetFruit);
+        localStorage.setItem('passapple-result-fruit', targetFruit);
+        console.log('[PassApple] fallback saved to storage', {
+            sessionHas: !!sessionStorage.getItem('passapple-result-image'),
+            localHas: !!localStorage.getItem('passapple-result-image')
+        });
+
+        setTimeout(() => {
+            console.log('[PassApple] navigating to result page via fallback', targetUrl.toString());
+            window.location.assign(targetUrl.toString());
+        }, 50);
     } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = i18n.t('save');
