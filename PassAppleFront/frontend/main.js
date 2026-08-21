@@ -301,6 +301,12 @@ saveBtn.addEventListener('click', async () => {
         const compositeCanvas = await window.compositeImages(baseImage.src, responseImageUrl);
         const compositeDataUrl = compositeCanvas.toDataURL('image/png');
 
+        sessionStorage.setItem('passapple-result-image', compositeDataUrl);
+        sessionStorage.setItem('passapple-result-fruit', fruit || 'apple');
+
+        const resultPageUrl = `result.html?fruit=${encodeURIComponent(fruit || 'apple')}`;
+        window.location.href = resultPageUrl;
+
         await new Promise((resolve) => setTimeout(resolve, 1000));
         resultImage.src = compositeDataUrl;
         resultImage.onload = () => {
@@ -311,6 +317,9 @@ saveBtn.addEventListener('click', async () => {
         }
     } catch (error) {
         console.error('Error:', error);
+        sessionStorage.setItem('passapple-result-image', canvas.toDataURL('image/png'));
+        sessionStorage.setItem('passapple-result-fruit', fruit || 'apple');
+        window.location.href = `result.html?fruit=${encodeURIComponent(fruit || 'apple')}`;
         resultImage.src = '';
         resultModal.classList.remove('hidden');
     } finally {

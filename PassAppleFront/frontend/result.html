@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Result - Pass Apple</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            overflow: auto;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .result-container {
+            width: min(900px, 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .result-card {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-image {
+            width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            display: block;
+            border-radius: 16px;
+            background: #111;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            border: none;
+            padding: 0.8rem 1.4rem;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn.primary {
+            background: white;
+            color: black;
+        }
+
+        .btn.secondary {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        a.btn {
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <div class="result-card">
+            <img id="resultImage" class="result-image" src="" alt="Processed result" />
+        </div>
+
+        <div class="actions">
+            <button id="downloadBtn" class="btn primary">Download</button>
+            <a href="index.html" class="btn secondary">Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const resultImage = document.getElementById('resultImage');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        const dataUrl = sessionStorage.getItem('passapple-result-image');
+        if (dataUrl) {
+            resultImage.src = dataUrl;
+        } else {
+            const params = new URLSearchParams(window.location.search);
+            const fruit = params.get('fruit') || 'apple';
+            resultImage.src = `static/images/${fruit}_base.jpg`;
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            if (!resultImage.src) return;
+            const link = document.createElement('a');
+            link.href = resultImage.src;
+            link.download = 'passapple-result.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
+</body>
+</html>
