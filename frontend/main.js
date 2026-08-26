@@ -313,7 +313,7 @@ async function buildProcessedImageDataUrl() {
         'static/images/apple_base.jpg',
         'static/images/apple_yake.jpg',
         canvas,
-        'input/bounding_box.txt',
+        'static/text/bounding_box.txt',
         0.7
     );
     return outputCanvas.toDataURL('image/png');
