@@ -85,7 +85,7 @@
 
         <div class="actions">
             <button id="downloadBtn" class="btn primary">Download</button>
-            <a href="index.html" class="btn secondary">Back to Home</a>
+            <a id="backToDrawing" href="apple.html?fruit=apple" class="btn secondary">Back to Home</a>
         </div>
     </div>
 
@@ -94,24 +94,34 @@
         const downloadBtn = document.getElementById('downloadBtn');
 
         const params = new URLSearchParams(window.location.search);
-        const dataUrl = sessionStorage.getItem('passapple-result-image')
-            || localStorage.getItem('passapple-result-image');
+        const backToDrawing = document.getElementById('backToDrawing');
+        backToDrawing.href = `apple.html?fruit=${encodeURIComponent(params.get('fruit') || 'apple')}`;
 
-        console.log('[PassApple] result page loaded', {
-            hasSession: !!sessionStorage.getItem('passapple-result-image'),
-            hasLocal: !!localStorage.getItem('passapple-result-image'),
-            fruit: params.get('fruit') || 'apple',
-            dataStart: dataUrl ? dataUrl.slice(0, 80) : 'none'
-        });
+        async function loadResultImage() {
+            const request = indexedDB.open('passapple', 1);
+            const record = await new Promise((resolve, reject) => {
+                request.onupgradeneeded = () => request.result.createObjectStore('results');
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    const transaction = request.result.transaction('results', 'readonly');
+                    const getRequest = transaction.objectStore('results').get('latest');
+                    getRequest.onsuccess = () => resolve(getRequest.result);
+                    getRequest.onerror = () => reject(getRequest.error);
+                };
+            });
+            return record ? URL.createObjectURL(record.image) : '';
+        }
 
-        if (dataUrl) {
-            resultImage.src = dataUrl;
-            console.log('[PassApple] result image set from storage');
-        } else {
+        loadResultImage().then((imageUrl) => {
+            if (imageUrl) {
+                resultImage.src = imageUrl;
+                return;
+            }
             const fruit = params.get('fruit') || 'apple';
             resultImage.src = `static/images/${fruit}_base.jpg`;
-            console.log('[PassApple] result image fallback to base image', resultImage.src);
-        }
+        }).catch((error) => {
+            console.error('[PassApple] failed to load result image', error);
+        });
 
         downloadBtn.addEventListener('click', () => {
             if (!resultImage.src) return;

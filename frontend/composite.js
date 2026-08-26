@@ -38,7 +38,7 @@
     return result;
   }
 
-  function findWhiteBounds(imageData) {
+  function findMaskBounds(imageData) {
     const { data, width, height } = imageData;
     let minX = width;
     let minY = height;
@@ -52,7 +52,8 @@
         const g = data[idx + 1];
         const b = data[idx + 2];
         const a = data[idx + 3];
-        const isWhite = r > 240 && g > 240 && b > 240 && a > 200;
+        const luminance = (r + g + b) / 3;
+        const isWhite = luminance >= 10 && a > 0;
 
         if (isWhite) {
           minX = Math.min(minX, x);
@@ -116,10 +117,36 @@
     return new ImageData(output, width, height);
   }
 
-  async function compositeToCanvas(baseSource, overlaySource, strength = 0.7) {
+  async function loadBoundingBox(source) {
+    if (!source) {
+      return null;
+    }
+
+    try {
+      const response = await fetch(source);
+      if (!response.ok) {
+        return null;
+      }
+
+      const text = await response.text();
+      for (const line of text.split(/\r?\n/)) {
+        const values = line.replace(/#.*/, '').trim().split(/[\s,]+/).filter(Boolean).map(Number);
+        if (values.length === 4 && values.every(Number.isFinite)) {
+          return { minX: values[0], minY: values[1], maxX: values[2], maxY: values[3] };
+        }
+      }
+    } catch (error) {
+      return null;
+    }
+    return null;
+  }
+
+  async function compositeToCanvas(baseSource, targetSource, maskSource, bboxSource, strength = 0.7) {
     const bulgeStrength = Number.isFinite(strength) ? Math.min(Math.max(strength, 0.1), 1.5) : 0.7;
     const baseImage = typeof baseSource === 'string' ? await loadImage(baseSource) : baseSource;
-    const overlayImage = typeof overlaySource === 'string' ? await loadImage(overlaySource) : overlaySource;
+    const targetImage = typeof targetSource === 'string' ? await loadImage(targetSource) : targetSource;
+    const maskImage = typeof maskSource === 'string' ? await loadImage(maskSource) : maskSource;
+    const configuredBounds = await loadBoundingBox(bboxSource);
 
     const width = baseImage.naturalWidth || baseImage.width;
     const height = baseImage.naturalHeight || baseImage.height;
@@ -131,25 +158,41 @@
     baseCtx.drawImage(baseImage, 0, 0, width, height);
     const baseData = baseCtx.getImageData(0, 0, width, height);
 
+    const targetWidth = targetImage.naturalWidth || targetImage.width;
+    const targetHeight = targetImage.naturalHeight || targetImage.height;
+    const targetCanvas = document.createElement('canvas');
+    targetCanvas.width = targetWidth;
+    targetCanvas.height = targetHeight;
+    const targetCtx = targetCanvas.getContext('2d');
+    targetCtx.drawImage(targetImage, 0, 0, targetWidth, targetHeight);
+    const targetData = targetCtx.getImageData(0, 0, targetWidth, targetHeight);
+
     const maskCanvas = document.createElement('canvas');
-    maskCanvas.width = width;
-    maskCanvas.height = height;
+    maskCanvas.width = targetWidth;
+    maskCanvas.height = targetHeight;
     const maskCtx = maskCanvas.getContext('2d');
-    maskCtx.drawImage(overlayImage, 0, 0, width, height);
-    const overlayData = maskCtx.getImageData(0, 0, width, height);
+    maskCtx.drawImage(maskImage, 0, 0, targetWidth, targetHeight);
+    const maskData = maskCtx.getImageData(0, 0, targetWidth, targetHeight);
 
-    const bounds = findWhiteBounds(overlayData);
-    const bulgedBase = bulgeImageData(baseData, bounds, bulgeStrength);
-    const bulgedMask = bulgeImageData(overlayData, bounds, bulgeStrength);
+    const bounds = configuredBounds || findMaskBounds(maskData);
+    const bulgedTarget = bulgeImageData(targetData, bounds, bulgeStrength);
+    const bulgedMask = bulgeImageData(maskData, bounds, bulgeStrength);
 
-    const result = new Uint8ClampedArray(bulgedBase.data);
-    for (let i = 0; i < result.length; i += 4) {
-      const alpha = bulgedMask.data[i + 3];
-      if (alpha > 20) {
-        result[i] = 255;
-        result[i + 1] = 255;
-        result[i + 2] = 255;
-        result[i + 3] = 255;
+    const result = new Uint8ClampedArray(baseData.data);
+    for (let y = 0; y < targetHeight; y += 1) {
+      for (let x = 0; x < targetWidth; x += 1) {
+        const targetIndex = (y * targetWidth + x) * 4;
+        const resultIndex = (y * width + x) * 4;
+        const alpha = Math.round((bulgedMask.data[targetIndex] + bulgedMask.data[targetIndex + 1] + bulgedMask.data[targetIndex + 2]) / 3);
+        if (alpha === 0 || resultIndex >= result.length) {
+          continue;
+        }
+
+        const sourceAlpha = alpha / 255;
+        result[resultIndex] = Math.round(bulgedTarget.data[targetIndex] * sourceAlpha + result[resultIndex] * (1 - sourceAlpha));
+        result[resultIndex + 1] = Math.round(bulgedTarget.data[targetIndex + 1] * sourceAlpha + result[resultIndex + 1] * (1 - sourceAlpha));
+        result[resultIndex + 2] = Math.round(bulgedTarget.data[targetIndex + 2] * sourceAlpha + result[resultIndex + 2] * (1 - sourceAlpha));
+        result[resultIndex + 3] = 255;
       }
     }
 

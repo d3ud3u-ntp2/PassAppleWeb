@@ -291,40 +291,42 @@ const closeModal = document.getElementById('closeModal');
 const resultImage = document.getElementById('resultImage');
 const downloadBtn = document.getElementById('downloadBtn');
 
-function buildProcessedImageDataUrl() {
-    const width = canvas.width;
-    const height = canvas.height;
-
-    const outputCanvas = document.createElement('canvas');
-    outputCanvas.width = width;
-    outputCanvas.height = height;
-
-    const outputCtx = outputCanvas.getContext('2d');
-    outputCtx.clearRect(0, 0, width, height);
-    outputCtx.drawImage(baseImage, 0, 0, width, height);
-
-    const baseData = outputCtx.getImageData(0, 0, width, height);
-    const overlayData = ctx.getImageData(0, 0, width, height);
-
-    for (let y = 0; y < height; y += 1) {
-        for (let x = 0; x < width; x += 1) {
-            const idx = (y * width + x) * 4;
-            const r = overlayData.data[idx];
-            const g = overlayData.data[idx + 1];
-            const b = overlayData.data[idx + 2];
-            const a = overlayData.data[idx + 3];
-
-            if (a > 20 && r > 240 && g > 240 && b > 240) {
-                baseData.data[idx] = 255;
-                baseData.data[idx + 1] = 255;
-                baseData.data[idx + 2] = 255;
-                baseData.data[idx + 3] = 255;
-            }
-        }
-    }
-
-    outputCtx.putImageData(baseData, 0, 0);
+async function buildProcessedImageDataUrl() {
+    const outputCanvas = await compositeImages(
+        'static/images/apple_base.jpg',
+        'static/images/apple_yake.jpg',
+        canvas,
+        'input/bounding_box.txt',
+        0.7
+    );
     return outputCanvas.toDataURL('image/png');
+}
+
+function saveResultImage(dataUrl, fruitName) {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('passapple', 1);
+        request.onupgradeneeded = () => request.result.createObjectStore('results');
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+            const transaction = request.result.transaction('results', 'readwrite');
+            transaction.objectStore('results').put({
+                image: dataUrlToBlob(dataUrl),
+                fruit: fruitName
+            }, 'latest');
+            transaction.oncomplete = resolve;
+            transaction.onerror = () => reject(transaction.error);
+        };
+    });
+}
+
+function dataUrlToBlob(dataUrl) {
+    const [header, encoded] = dataUrl.split(',', 2);
+    const binary = atob(encoded);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) {
+        bytes[index] = binary.charCodeAt(index);
+    }
+    return new Blob([bytes], { type: header.match(/data:([^;]+)/)?.[1] || 'image/png' });
 }
 
 saveBtn.addEventListener('click', async () => {
@@ -335,22 +337,14 @@ saveBtn.addEventListener('click', async () => {
     const targetFruit = fruit || 'apple';
     const targetUrl = new URL('result.html', window.location.href);
     targetUrl.searchParams.set('fruit', targetFruit);
+    targetUrl.searchParams.set('v', Date.now().toString());
 
     try {
-        const processedDataUrl = buildProcessedImageDataUrl();
+        const processedDataUrl = await buildProcessedImageDataUrl();
         console.log('[PassApple] processed image generated', processedDataUrl.slice(0, 80));
 
-        sessionStorage.removeItem('passapple-result-image');
-        localStorage.removeItem('passapple-result-image');
-        sessionStorage.setItem('passapple-result-image', processedDataUrl);
-        localStorage.setItem('passapple-result-image', processedDataUrl);
-        sessionStorage.setItem('passapple-result-fruit', targetFruit);
-        localStorage.setItem('passapple-result-fruit', targetFruit);
-        console.log('[PassApple] saved to storage', {
-            sessionHas: !!sessionStorage.getItem('passapple-result-image'),
-            localHas: !!localStorage.getItem('passapple-result-image'),
-            fruit: sessionStorage.getItem('passapple-result-fruit')
-        });
+        await saveResultImage(processedDataUrl, targetFruit);
+        console.log('[PassApple] saved to IndexedDB');
 
         setTimeout(() => {
             console.log('[PassApple] navigating to result page', targetUrl.toString());
@@ -358,18 +352,10 @@ saveBtn.addEventListener('click', async () => {
         }, 50);
     } catch (error) {
         console.error('[PassApple] save error:', error);
-        const fallbackImage = buildProcessedImageDataUrl();
+        const fallbackImage = await buildProcessedImageDataUrl();
 
-        sessionStorage.removeItem('passapple-result-image');
-        localStorage.removeItem('passapple-result-image');
-        sessionStorage.setItem('passapple-result-image', fallbackImage);
-        localStorage.setItem('passapple-result-image', fallbackImage);
-        sessionStorage.setItem('passapple-result-fruit', targetFruit);
-        localStorage.setItem('passapple-result-fruit', targetFruit);
-        console.log('[PassApple] fallback saved to storage', {
-            sessionHas: !!sessionStorage.getItem('passapple-result-image'),
-            localHas: !!localStorage.getItem('passapple-result-image')
-        });
+        await saveResultImage(fallbackImage, targetFruit);
+        console.log('[PassApple] fallback saved to IndexedDB');
 
         setTimeout(() => {
             console.log('[PassApple] navigating to result page via fallback', targetUrl.toString());
