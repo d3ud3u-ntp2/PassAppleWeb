@@ -32,6 +32,24 @@
             position: relative;
         }
 
+        .site-footer {
+            width: 100%;
+            padding: 1.5rem 1rem 2rem;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .site-footer a {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+
+        .site-footer a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
         .top-bar {
             position: absolute;
             top: 0;
@@ -222,20 +240,11 @@
                 <img src="static/images/apple_base.jpg" alt="Apple" data-i18n="fruit-apple">
                 <span data-i18n="fruit-apple">Apple</span>
             </a>
-            <a class="fruit-card disabled" id="card-maron">
-                <img src="static/images/maron_base.png" alt="Maron" data-i18n="fruit-maron">
-                <span data-i18n="fruit-maron">Maron</span>
-            </a>
-            <a class="fruit-card disabled" id="card-radish">
-                <img src="static/images/radish_base.png" alt="Radish" data-i18n="fruit-radish">
-                <span data-i18n="fruit-radish">Radish</span>
-            </a>
-            <a class="fruit-card disabled" id="card-watermelon">
-                <img src="static/images/watermeron_base.png" alt="Watermelon" data-i18n="fruit-watermelon">
-                <span data-i18n="fruit-watermelon">Watermelon</span>
-            </a>
         </div>
     </div>
+    <footer class="site-footer">
+        <a href="terms.html">Terms of Service</a>
+    </footer>
     <script src="i18n.js"></script>
     <script>
         function updateActiveLang() {

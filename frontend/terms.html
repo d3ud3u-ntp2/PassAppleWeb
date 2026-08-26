@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="terms-title">Terms of Service - Pass Apple</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            height: auto;
+            overflow: auto;
+            padding: 6rem 1.25rem 3rem;
+            background: radial-gradient(circle at top, #1a1a1a 0%, #000000 70%);
+        }
+
+        .terms-page {
+            width: min(760px, 100%);
+            margin: 0 auto;
+        }
+
+        .terms-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .terms-header h1 {
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            font-weight: 600;
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 0.35rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .lang-btn {
+            padding: 0.35rem 0.55rem;
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            background: transparent;
+            color: white;
+            opacity: 0.55;
+            cursor: pointer;
+        }
+
+        .lang-btn.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .terms-content {
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            line-height: 1.8;
+        }
+
+        .terms-content h1,
+        .terms-content h2,
+        .terms-content h3 {
+            margin: 1.5rem 0 0.75rem;
+            line-height: 1.3;
+        }
+
+        .terms-content h1:first-child,
+        .terms-content h2:first-child,
+        .terms-content h3:first-child {
+            margin-top: 0;
+        }
+
+        .terms-content p,
+        .terms-content ul {
+            margin: 0.75rem 0;
+        }
+
+        .terms-content ul {
+            padding-left: 1.5rem;
+        }
+
+        .terms-empty {
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        @media (max-width: 600px) {
+            .terms-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .terms-content {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="terms-page">
+        <header class="terms-header">
+            <h1 data-i18n="terms-title">Terms of Service</h1>
+            <a class="btn secondary" href="index.html" data-i18n="back">Back</a>
+        </header>
+        <nav class="lang-switch" aria-label="Language">
+            <button class="lang-btn" data-lang="ja">JA</button>
+            <button class="lang-btn" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="zh">ZH</button>
+            <button class="lang-btn" data-lang="ko">KO</button>
+            <button class="lang-btn" data-lang="itl">ITL</button>
+        </nav>
+        <article id="termsContent" class="terms-content" aria-live="polite">Loading...</article>
+    </main>
+    <script src="i18n.js?v=terms1"></script>
+    <script>
+        const termsContent = document.getElementById('termsContent');
+
+        function renderMarkdown(markdown) {
+            const fragment = document.createDocumentFragment();
+            const lines = markdown.replace(/\r/g, '').split('\n');
+            let list = null;
+
+            const closeList = () => {
+                if (list) {
+                    fragment.appendChild(list);
+                    list = null;
+                }
+            };
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed) {
+                    closeList();
+                    continue;
+                }
+
+                const heading = trimmed.match(/^(#{1,3})\s+(.+)$/);
+                const item = trimmed.match(/^[-*]\s+(.+)$/);
+                if (heading) {
+                    closeList();
+                    const element = document.createElement(`h${heading[1].length}`);
+                    element.textContent = heading[2];
+                    fragment.appendChild(element);
+                } else if (item) {
+                    if (!list) list = document.createElement('ul');
+                    const element = document.createElement('li');
+                    element.textContent = item[1];
+                    list.appendChild(element);
+                } else {
+                    closeList();
+                    const element = document.createElement('p');
+                    element.textContent = trimmed;
+                    fragment.appendChild(element);
+                }
+            }
+            closeList();
+            termsContent.replaceChildren(fragment);
+        }
+
+        async function loadTerms() {
+            const language = i18n.currentLang();
+            const sources = language === 'ja'
+                ? ['static/texts/terms.md', 'static/text/terms.md']
+                : [`static/texts/terms.${language}.md`, 'static/texts/terms.md', 'static/text/terms.md'];
+            for (const source of sources) {
+                try {
+                    const response = await fetch(source);
+                    if (!response.ok) continue;
+                    const markdown = await response.text();
+                    if (markdown.trim()) {
+                        renderMarkdown(markdown);
+                        return;
+                    }
+                } catch (error) {
+                    // Try the next supported path.
+                }
+            }
+            termsContent.innerHTML = `<p class="terms-empty">${i18n.t('terms-empty')}</p>`;
+        }
+
+        function updateLanguageButtons() {
+            document.querySelectorAll('.lang-btn').forEach((button) => {
+                button.classList.toggle('active', button.dataset.lang === i18n.currentLang());
+            });
+        }
+
+        document.querySelectorAll('.lang-btn').forEach((button) => {
+            button.addEventListener('click', () => {
+                i18n.setLanguage(button.dataset.lang);
+                updateLanguageButtons();
+                loadTerms();
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateLanguageButtons();
+            loadTerms();
+        });
+    </script>
+</body>
+</html>

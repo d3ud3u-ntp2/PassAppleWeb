@@ -80,6 +80,23 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
+function restoreDrawingState() {
+    const savedDrawing = sessionStorage.getItem('passapple-drawing');
+    if (!savedDrawing) {
+        return;
+    }
+
+    const image = new Image();
+    image.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        saveState();
+    };
+    image.src = savedDrawing;
+}
+
+restoreDrawingState();
+
 // Drawing logic
 function startDrawing(e) {
     if (e.touches && e.touches.length === 2) {
@@ -340,6 +357,7 @@ saveBtn.addEventListener('click', async () => {
     targetUrl.searchParams.set('v', Date.now().toString());
 
     try {
+        sessionStorage.setItem('passapple-drawing', canvas.toDataURL('image/png'));
         const processedDataUrl = await buildProcessedImageDataUrl();
         console.log('[PassApple] processed image generated', processedDataUrl.slice(0, 80));
 
